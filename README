@@ -1,0 +1,12 @@
+# Gestionnaire de tâches
+
+Gestionnaire de tâches créé à l'aide de Javascript.
+
+## Fonctionnalités
+
+- Ajouter une nouvelle tâche, mettre sa priorité (de basse à haute) et inclure dynamiquement la date et l'heure d'ajout;
+- Trier les tâches d'abord par ordre d'importance, suivi de l'ordre alphabétique ou vice versa;
+- Afficher les détails d'une tâche par fenêtre modale;
+- Marquer la tâche comme _faite_ en cliquant sur celle-ci;
+- Sauvegarde de la liste de tâches dans le Local Storage;
+- Effacer une tâche.

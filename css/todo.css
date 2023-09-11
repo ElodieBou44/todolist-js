@@ -1,0 +1,127 @@
+@font-face {
+  font-family: 'BlankNotes';
+  src: url('./fonts/BlankNotes.otf'); 
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Karla';
+  src: url('./fonts/Karla.ttf'); 
+  font-weight: normal;
+  font-style: normal;
+}
+
+h1{
+  font-family: 'BlankNotes';
+  font-size: 3em;
+}
+
+body, button, dialog, input, select {
+  font-family: 'Karla';
+}
+
+body {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* formulaires
+   =========== */
+
+label, input, select, button {
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0 10px 5px 0;
+}
+
+input, select, button {
+  padding: 8px;
+  width: 400px;
+  font-size: 16px;
+}
+
+select, button {
+  width: 150px;
+}
+
+.tri {
+  margin-top: 30px;
+}
+
+[name="tri"] {
+  width: 200px;
+}
+
+#msgErr {
+  color: #ef6f6c;
+}
+
+/* liste des tâches
+   ================ */
+
+#listeTaches {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: minmax(600px, max-content) max-content;
+  grid-gap: 3px;
+}
+
+.l {
+  display: contents;
+  cursor: pointer;
+}
+
+.l:nth-of-type(2n) .c {
+  background-color: #fccb90;
+}
+
+.l:nth-of-type(2n+1) .c {
+  background-color: #efb46c;
+}
+
+.c {
+  box-sizing: border-box;
+  padding: 5px 20px;
+  line-height: 32px;
+  border-radius: 3px;
+}
+
+[data-fait='true'] {
+  text-decoration: line-through;
+  color: rgb(97, 97, 97);
+}
+
+.detail, .effacer {
+  color: rgb(97, 97, 97);
+  text-decoration: underline;
+}
+
+.detail:hover, .effacer:hover {
+  color: #000;
+}
+
+/* fenêtre modale
+   ============== */
+
+#modale {
+  min-width: 300px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 0 8px #777;
+}
+
+#modale h2 {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+#modale span {
+  color: #6c91ef;
+  font-weight: bold;
+}
+
+#modale button {
+  display: block;
+  margin: 30px auto 10px;
+}

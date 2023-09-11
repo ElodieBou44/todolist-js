@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">        
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TODO</title>
+  <script src="fonctions.js"> </script>
+  <script src="listeners.js"> </script>
+  <link href="css/todo.css?v=1.01" rel="stylesheet">
+</head>
+<script>
+'use strict';
+window.addEventListener("load", function() {
+
+  /** Fonction Initialiser
+   * Cette fonction initialise le tableau selon les données récupérées dans le LocalStorage.
+   */
+  let tTaches = []; 
+  function initialiser(){
+      let tTachesJSON = localStorage.tTaches;
+      if (tTachesJSON){
+          tTaches = JSON.parse(tTachesJSON);
+      }
+  }
+  
+  initialiser();
+
+  // ******** Fonction Afficher  ********
+  /** Fonction Afficher
+   * Cette fonction afficher les données du tableau à l'aide du template donné, sur la div nécessaire.
+  */
+  let templateListeHTML = document.getElementById('modeleListe').innerHTML;
+  let modale = document.getElementById("listeTaches"); 
+
+  function afficher (){
+    modale.innerHTML = ""; 
+    tTaches.forEach(tache => {
+    let html = templateListeHTML; 
+    html = html.replaceAll("{nom}", tache.nom).replaceAll("{importance}", tache.importance).replaceAll("{id}", tache.id).replaceAll("{fait}", tache.fait);
+    modale.insertAdjacentHTML("afterbegin", html);
+    });
+  }
+
+  afficher(); 
+
+  /** Fonction Sauvegarder Localstorage
+   * Cette fonction sauvegarde les nouvelles données du tableau dans le LocalStorage afin de pouvoir récupérer ces informations lors du rechargement.
+  */
+  function sauvegarde(){
+    let tTachesJSON = JSON.stringify(tTaches);
+    localStorage.tTaches = tTachesJSON;
+  }
+
+
+  /** Fonction Ajouter Tâche
+   * Cette fonction permet d'ajouter une tâche au tableau de tâches et de donner un ID incrémenté à chaque nouvelle tâche.
+  */
+  function ajouterTache(){
+    let maxId = 0;
+    let newId = 0;
+    if(tTaches.length == 0){
+      newId = 1; 
+    }
+    else{
+      tTaches.forEach(tache => {
+        if (tache.id > maxId) {
+          maxId = tache.id;
+          newId = maxId + 1;
+        }
+      })
+    }
+    //Ajouter la tâche au tableau
+    tTaches.push({"nom": frm1.tache.value, "importance": frm1.importance.value, "date": functionDate(), "id": newId, "fait": "false"});
+    afficher(); 
+    sauvegarde(); 
+  };
+
+  // ******** Listener Ajout ********
+
+  let btnAjout = document.querySelector('button[name="ajouter"]');
+  
+  btnAjout.addEventListener('click', (evt) => {
+    document.getElementById('msgErr').innerHTML = "";
+    if(frm1.tache.value){
+      ajouterTache(); 
+    }
+    else{
+      document.getElementById('msgErr').innerHTML = "Veuillez saisir une tâche à entrer.";
+    }
+  });
+
+  // ******** Listener Tri ********
+
+  let selectTri = document.querySelector('form[name="frm2"]').querySelector('select[name="tri"]');
+
+  selectTri.addEventListener('change', (evt) =>{
+    let optionTri = evt.target.value;
+    if(optionTri === "nom/importance"){
+      /** Fonction Tri par Nom/Importance
+       * Cette fonction tri les tâches premièrement selon le nom, et ensuite selon l'importance.
+       * @param {string} a - Un premier nom de tâche.
+       * @param {string} b - Le nom de tâche suivant.
+       * @returns {number} L'ordre de changement à effectuer.
+       */
+      tTaches.sort(function(a, b) {
+        let nomA = a.nom.toUpperCase(); 
+        let nomB = b.nom.toUpperCase(); 
+        if (nomA < nomB) return 1;
+        if (nomA > nomB) return -1;
+        if (a.importance < b.importance) return 1;
+        if (a.importance > b.importance) return -1;
+        return 0;
+      });
+    }
+    else if(optionTri === "importance/nom"){
+      /** Fonction Tri par Importance/Nom
+       * Cette fonction tri les tâches premièrement selon leur importance, et ensuite selon leur nom.
+       * @param {number} a - L'importance d'une première tâche.
+       * @param {number} b - L'importance de la tâche suivante.
+       * @returns {number} L'ordre de changement à effectuer.
+       */
+      tTaches.sort(function(a, b) {
+        if (a.importance < b.importance) return 1;
+        if (a.importance > b.importance) return -1;
+        let nomA = a.nom.toUpperCase(); 
+        let nomB = b.nom.toUpperCase(); 
+        if (nomA < nomB) return 1;
+        if (nomA > nomB) return -1;
+        return 0;
+      });
+    };
+    modale.innerHTML = ""; 
+    afficher(); 
+  })
+
+  // ******** Listener Liste Taches  ********
+
+  let listeTaches = document.getElementById('listeTaches');
+  listeTaches.addEventListener('click', (evt) =>{
+    let tacheTarget = evt.target.innerHTML; 
+    let idTache = evt.target.parentNode.parentNode.querySelector("div.c").getAttribute('data-id');
+    if(tacheTarget === "détail"){
+      detaillerTache(evt); 
+    /** Fonction Detailler Tache
+      * Cette fonction permet d'afficher une fenêtre modale contenant les détails d'une tâche précise. 
+    */
+      function detaillerTache(){
+        let idTache = parseInt(evt.target.parentNode.parentNode.querySelector("div.c").getAttribute('data-id'));
+        let tacheM = tTaches.find(tache => tache.id === idTache);
+        let template = document.getElementById('modeleDetail').innerHTML; 
+        let modale = document.getElementById('modale');
+        let modaleDetails = template.replaceAll('{id}',tacheM.id).replaceAll('{nom}', tacheM.nom).replaceAll('{importance}',tacheM.importance).replaceAll('{fait}',tacheM.fait).replaceAll('{date}',functionDate()); 
+        modale.innerHTML = modaleDetails;
+        modale.showModal();
+      }
+    }
+    else if(tacheTarget === "effacer"){
+      let tacheAsupprimer = tTaches.findIndex(tache => tache.id === idTache);
+      tTaches.splice(tacheAsupprimer,1); 
+      sauvegarde(); 
+      afficher(); 
+    }
+  })
+
+  // ******** Listener Changer Statut  ********
+  
+  let nomsTache = document.querySelectorAll('.c.tache')
+  nomsTache.forEach(nomTache => {
+    nomTache.addEventListener('click', (evt) =>{
+      changerStatut(); 
+      /** Fonction Changer Statut
+        * Cette fonction permet de changer le statut d'une tâche (non-réalisée à réalisée et vice-versa) lorsque l'on clique sur le nom de la tâche. 
+      */
+      function changerStatut(){
+        let dataFait = nomTache.getAttribute('data-fait'); 
+        if(dataFait === "false"){
+          nomTache.setAttribute('data-fait', 'true');
+        }        
+        else{
+          nomTache.setAttribute('data-fait', 'false');
+        }
+        sauvegarde(); 
+      }   
+    })
+  })
+
+    /** Fonction Changer Statut
+      * Cette fonction permet de préciser la date et l'heure courantes dans un format demandé. 
+      * @returns {string} Les jour, mois, année, heure, minutes et secondes dans le format XX/XX/XXXX XX:XX:XX.
+    */
+    function functionDate(){
+      let temps = new Date(); 
+      let heures = temps.getHours();
+      if (heures < 10){
+        heures = "0"+heures; 
+      }
+      let minutes = temps.getMinutes();
+      if (minutes < 10){
+        minutes = "0"+minutes; 
+      }
+      let secondes = temps.getSeconds();
+      if (secondes < 10){
+        secondes = "0"+secondes; 
+      }
+      let jour = temps.getDate();
+      if (jour < 10){
+        jour = "0"+jour; 
+      }
+      let mois = temps.getMonth(); 
+      if (mois < 10){
+        mois = "0"+mois; 
+      }
+      let annee = temps.getFullYear(); 
+      let dateAjd = jour + "/" + mois + "/" + annee + ", "+heures+":"+minutes+":"+secondes;
+
+      return dateAjd;
+  }
+
+});
+</script>
+
+<body>    
+        
+  <template id="modeleListe">
+    <div class="l">
+      <div class="c tache" data-id="{id}" data-fait="{fait}" data-importance="{importance}">
+        {nom} ({importance})
+      </div>
+      <div class="c" data-id={id}>
+        <span class="detail">détail</span>&nbsp;&nbsp;
+        <span class="effacer">effacer</span>
+      </div>
+    </div>
+  </template>
+    
+  <template id="modeleDetail">
+    <section>
+      <h2>Détails de la tâche</h2>
+      <p><span>Numéro:</span>           {id}</p>
+      <p><span>Nom:</span>              {nom}</p>
+      <p><span>Importance:</span>       {importance}</p>
+      <p><span>Faite:</span>            {fait}</p>
+      <p><span>Date de création:</span> {date}</p>
+      <button onclick="document.getElementById('modale').close()">Fermer</button>
+    </section>
+  </template>
+    
+  <header>
+    <h1>Gestionnaire de tâches</h1>
+  </header>
+  <main>
+
+    <form name="frm1">
+      <label>Nouvelle tâche:</label>
+      <input type="text" name="tache">
+      <select name="importance">
+        <option value="1">Haute (1)</option>
+        <option value="2" selected>Moyenne (2)</option>
+        <option value="3">Basse (3)</option>
+      </select>
+      <button type="button" name="ajouter">Ajouter</button>
+      <span id="msgErr"></span>
+    </form>
+
+    <form name="frm2" class="tri">
+      <label>Tri par:</label>
+      <select name="tri">
+        <option value="nom/importance" selected>Nom/Importance</option>
+        <option value="importance/nom">Importance/Nom</option>
+      </select>
+    </form>
+
+    <div id="listeTaches"></div>
+
+    <dialog id="modale"></dialog>
+
+  </main>
+</body>
+</html>
